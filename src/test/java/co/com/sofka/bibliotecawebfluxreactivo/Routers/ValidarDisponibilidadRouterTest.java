@@ -6,6 +6,7 @@ import co.com.sofka.bibliotecawebfluxreactivo.Enums.TipoMaterial;
 import co.com.sofka.bibliotecawebfluxreactivo.Mappers.MaterialMapper;
 import co.com.sofka.bibliotecawebfluxreactivo.Repositories.MaterialRepositorio;
 import co.com.sofka.bibliotecawebfluxreactivo.UseCases.ValidarDisponibilidadUseCase;
+import co.com.sofka.bibliotecawebfluxreactivo.Utils.Mensaje;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,9 +45,9 @@ class ValidarDisponibilidadRouterTest {
                 .uri("/biblioteca/validar/1234")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(String.class)
+                .expectBody(Mensaje.class)
                 .value(userResponse->{
-                    Assertions.assertThat(userResponse).isEqualTo("El material esta disponible");
+                    Assertions.assertThat(userResponse.getMensaje()).isEqualTo("El material esta disponible");
                 });
 
         Mockito.verify(materialRepositorio,Mockito.times(1)).findById("1234");

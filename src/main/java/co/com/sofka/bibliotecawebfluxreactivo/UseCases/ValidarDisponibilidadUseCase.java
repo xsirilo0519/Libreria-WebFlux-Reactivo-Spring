@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Validated
-public class ValidarDisponibilidadUseCase implements ObtenerMensajePorId{
+public class ValidarDisponibilidadUseCase implements IObtenerMensajeObjByID{
     private final String MENSAGE_DISPONIBLE="El material esta disponible";
     private final MaterialRepositorio repositorio;
     private final MaterialMapper materialMapper;
@@ -23,17 +23,21 @@ public class ValidarDisponibilidadUseCase implements ObtenerMensajePorId{
 
 
     @Override
-    public Mono<String> get(String id) {
+    public Mono<Mensaje> get(String id) {
         return repositorio.findById(id).map(materialMapper.fromCollection())
                 .map(material->getMensajeValidado(material,material.isEstado()))
-                .switchIfEmpty(Mono.just("No se encontró el valor"));
+                .switchIfEmpty(Mono.just(new Mensaje(true,"No se encontró el Material")));
     }
 
-    private String getMensajeValidado(MaterialDTO materialDTO, boolean disponible) {
+    private Mensaje getMensajeValidado(MaterialDTO materialDTO, boolean disponible) {
+        Mensaje mensaje=new Mensaje();
+        mensaje.setEstado(disponible);
         if(disponible){
-            return MENSAGE_DISPONIBLE;
+            mensaje.setMensaje(MENSAGE_DISPONIBLE);
         }else{
-            return "El material fue prestado el: "+ materialDTO.getFechaPrestamos();
+            mensaje.setMensaje("El material fue prestado el: "+ materialDTO.getFechaPrestamos());
         }
+        return mensaje;
     }
+
 }
