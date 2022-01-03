@@ -6,8 +6,7 @@ import co.com.sofka.bibliotecawebfluxreactivo.Enums.AreaTematica;
 import co.com.sofka.bibliotecawebfluxreactivo.Enums.TipoMaterial;
 import co.com.sofka.bibliotecawebfluxreactivo.Mappers.MaterialMapper;
 import co.com.sofka.bibliotecawebfluxreactivo.Repositories.MaterialRepositorio;
-import co.com.sofka.bibliotecawebfluxreactivo.UseCases.CrearMaterialUseCase;
-
+import co.com.sofka.bibliotecawebfluxreactivo.UseCases.ActualizarMaterialUseCase;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,13 +22,14 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CrearMaterialRouter.class, CrearMaterialUseCase.class, MaterialMapper.class})
-class CrearMaterialRouterTest {
+@ContextConfiguration(classes = {ActualizarMaterialRouter.class, ActualizarMaterialUseCase.class, MaterialMapper.class})
+class ActualizarMaterialRouterTest {
 
     @MockBean
     private MaterialRepositorio materialRepositorio;
@@ -38,18 +38,18 @@ class CrearMaterialRouterTest {
     private WebTestClient webTestClient;
 
     @Test
-    public void testCrearMaterial(){
-        var material = new Material(null,true, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
-        var materialDto = new MaterialDTO("1234",true, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
+    public void testActualizarMaterial(){
+        var material = new Material("1234",true, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
+        var material1 = new MaterialDTO("1234",true, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
         Mono<Material> materialMono = Mono.just(material);
 
         when(materialRepositorio.save(Mockito.refEq(material))).thenReturn(materialMono);
 
-        webTestClient.post()
-                .uri("/biblioteca/crear")
+        webTestClient.put()
+                .uri("/biblioteca/modificar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(materialDto), MaterialDTO.class)
+                .body(Mono.just(material1), MaterialDTO.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(MaterialDTO.class)
@@ -65,4 +65,5 @@ class CrearMaterialRouterTest {
         Mockito.verify(materialRepositorio,Mockito.times(1)).save(Mockito.refEq(material));
 
     }
+
 }
