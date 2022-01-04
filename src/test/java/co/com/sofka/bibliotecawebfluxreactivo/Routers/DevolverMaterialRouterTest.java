@@ -5,7 +5,7 @@ import co.com.sofka.bibliotecawebfluxreactivo.Enums.AreaTematica;
 import co.com.sofka.bibliotecawebfluxreactivo.Enums.TipoMaterial;
 import co.com.sofka.bibliotecawebfluxreactivo.Mappers.MaterialMapper;
 import co.com.sofka.bibliotecawebfluxreactivo.Repositories.MaterialRepositorio;
-import co.com.sofka.bibliotecawebfluxreactivo.UseCases.PrestarMaterialUseCase;
+import co.com.sofka.bibliotecawebfluxreactivo.UseCases.DevolverMaterialUseCase;
 import co.com.sofka.bibliotecawebfluxreactivo.Utils.Mensaje;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,10 +24,12 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+
 @WebFluxTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {PrestarMaterialRouter.class, PrestarMaterialUseCase.class, MaterialMapper.class})
-class PrestarMaterialRouterTest {
+@ContextConfiguration(classes = {DevolverMaterialRouter.class, DevolverMaterialUseCase.class, MaterialMapper.class})
+class DevolverMaterialRouterTest {
+
     @MockBean
     private MaterialRepositorio materialRepositorio;
 
@@ -35,15 +37,14 @@ class PrestarMaterialRouterTest {
     private WebTestClient webTestClient;
 
     @Test
-    public void testPrestarMaterialDisponible(){
-
-        Material material = new Material("1234",true, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
+    public void testDevolverMaterialPrestado(){
+        Material material = new Material("1234",false, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
         Mono<Material> materialMono = Mono.just(material);
 
         when(materialRepositorio.findById("1234")).thenReturn(materialMono);
 
         webTestClient.put()
-                .uri("/biblioteca/prestar/1234")
+                .uri("/biblioteca/devolver/1234")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Mensaje.class)
@@ -56,23 +57,23 @@ class PrestarMaterialRouterTest {
     }
 
     @Test
-    public void testPrestarMaterialPrestado(){
-
-        Material material = new Material("1234",false, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
+    public void testDevolverMaterialDisponible(){
+        Material material = new Material("1234",true, LocalDate.now(), TipoMaterial.Libros, AreaTematica.Matematica,"Libro de la vida","muy buena");
         Mono<Material> materialMono = Mono.just(material);
 
         when(materialRepositorio.findById("1234")).thenReturn(materialMono);
 
         webTestClient.put()
-                .uri("/biblioteca/prestar/1234")
+                .uri("/biblioteca/devolver/1234")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Mensaje.class)
                 .value(userResponse->{
-                    Assertions.assertThat(userResponse.getMensaje()).isEqualTo("El material se encuentra prestado");
+                    Assertions.assertThat(userResponse.getMensaje()).isEqualTo("El material esta disponible");
                 });
 
         Mockito.verify(materialRepositorio,Mockito.times(1)).findById("1234");
 
     }
+
 }

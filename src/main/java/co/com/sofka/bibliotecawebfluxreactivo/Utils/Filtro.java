@@ -4,8 +4,19 @@ public class Filtro {
     private String area;
     private String tipo;
 
+    public Filtro() {
+    }
+
     public Filtro(String area, String tipo) {
         this.area = area;
+        this.tipo = tipo;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public void setTipo(String tipo) {
         this.tipo = tipo;
     }
 
