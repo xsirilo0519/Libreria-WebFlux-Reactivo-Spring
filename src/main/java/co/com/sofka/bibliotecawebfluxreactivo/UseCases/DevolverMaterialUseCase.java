@@ -21,30 +21,20 @@ public class DevolverMaterialUseCase implements IObtenerMensajeObjByID{
     public DevolverMaterialUseCase(MaterialMapper mapperUtils, MaterialRepositorio repositorio) {
         this.repositorio = repositorio;
         this.materialMapper = mapperUtils;}
+
     @Override
     public Mono<Mensaje> get(String id) {
-        return repositorio.findById(id).map(material->materialMapper.fromCollection().apply(material))
-                .map(material->getMensajeCambioEstado(material,!material.isEstado(),MENSAGE_DISPONIBLE));
+        return repositorio.findById(id).map(materialMapper.fromCollection())
+                .flatMap(material->{
+                    if (!material.isEstado()){
+                        material.setFechaPrestamos(LocalDate.now());
+                        material.setEstado(!material.isEstado());
+                        return repositorio.save(materialMapper.fromDTO(material.getId()).apply(material)).thenReturn(new Mensaje(true,"Transaccion satisfactoriamente"));
+                    }
+                    return Mono.just(new Mensaje(false,MENSAGE_DISPONIBLE ));
+                })
+                .switchIfEmpty(Mono.just(new Mensaje(true,"sadas")));
     }
 
-    private Mensaje getMensajeCambioEstado(MaterialDTO materialDTO, boolean disponible, String mensaje) {
-        if(disponible){
-            cambiarEstado(materialDTO);
-            return new Mensaje(disponible,"Transaccion satisfactoriamente");
-        }
-        return new Mensaje(disponible,mensaje );
-    }
 
-    private void cambiarEstado(MaterialDTO materialDTO) {
-        materialDTO.setEstado(!materialDTO.isEstado());
-        if (!materialDTO.isEstado()) {
-            materialDTO.setFechaPrestamos(LocalDate.now());
-        }
-
-        Material material = materialMapper.fromDTO(materialDTO.getId()).apply(materialDTO);
-        System.out.println(material.toString());
-        this.repositorio.save(material);
-
-        System.out.println("--------------------------------------------------");
-    }
 }

@@ -28,12 +28,13 @@ public class FiltrarRouter {
     @Bean
     public RouterFunction<ServerResponse> Filtrar(FiltrarUseCase filtrarUseCase) {
 
-        return route(GET("/biblioteca/filtrar").and(accept(MediaType.APPLICATION_JSON)),
+        return route(POST("/biblioteca/filtrar").and(accept(MediaType.APPLICATION_JSON)),
                 request -> request.bodyToMono(Filtro.class)
                         .flatMap(filtra->filtrarUseCase.get(filtra).collectList())
                         .flatMap(result->ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(result))
+
         );
 
     }

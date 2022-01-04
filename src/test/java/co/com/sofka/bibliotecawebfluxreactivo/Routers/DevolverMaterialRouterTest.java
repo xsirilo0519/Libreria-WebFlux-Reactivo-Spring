@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -42,6 +43,8 @@ class DevolverMaterialRouterTest {
         Mono<Material> materialMono = Mono.just(material);
 
         when(materialRepositorio.findById("1234")).thenReturn(materialMono);
+        when(materialRepositorio.save(any())).thenReturn(materialMono);
+
 
         webTestClient.put()
                 .uri("/biblioteca/devolver/1234")
@@ -53,6 +56,8 @@ class DevolverMaterialRouterTest {
                 });
 
         Mockito.verify(materialRepositorio,Mockito.times(1)).findById("1234");
+        Mockito.verify(materialRepositorio,Mockito.times(1)).save(any());
+
 
     }
 
@@ -73,6 +78,8 @@ class DevolverMaterialRouterTest {
                 });
 
         Mockito.verify(materialRepositorio,Mockito.times(1)).findById("1234");
+        Mockito.verify(materialRepositorio,Mockito.times(0)).save(any());
+
 
     }
 

@@ -90,16 +90,5 @@ public class Material {
         this.descripcion = descripcion;
     }
 
-    @Override
-    public String toString() {
-        return "Material{" +
-                "id='" + id + '\'' +
-                ", estado=" + estado +
-                ", fechaPrestamos=" + fechaPrestamos +
-                ", tipoMaterial=" + tipoMaterial +
-                ", areaTematica=" + areaTematica +
-                ", nombre='" + nombre + '\'' +
-                ", descripcion='" + descripcion + '\'' +
-                '}';
-    }
+
 }

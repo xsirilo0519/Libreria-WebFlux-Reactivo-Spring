@@ -2,7 +2,6 @@ package co.com.sofka.bibliotecawebfluxreactivo.UseCases;
 
 
 import co.com.sofka.bibliotecawebfluxreactivo.Collections.Material;
-import co.com.sofka.bibliotecawebfluxreactivo.DTOs.MaterialDTO;
 import co.com.sofka.bibliotecawebfluxreactivo.Mappers.MaterialMapper;
 import co.com.sofka.bibliotecawebfluxreactivo.Repositories.MaterialRepositorio;
 import co.com.sofka.bibliotecawebfluxreactivo.Utils.Mensaje;
@@ -28,24 +27,32 @@ public class PrestarMaterialUseCase implements IObtenerMensajeObjByID {
     @Override
     public Mono<Mensaje> get(String id) {
         return repositorio.findById(id).map(materialMapper.fromCollection())
-                .map(material->getMensajeCambioEstado(material,material.isEstado(),MENSAGE_PRESTADO));
-    }
-    private Mensaje getMensajeCambioEstado(MaterialDTO materialDTO, boolean disponible, String mensaje) {
-        if(disponible){
-            cambiarEstado(materialDTO);
-            return new Mensaje(disponible,"Transaccion satisfactoriamente");
-        }
-        return new Mensaje(disponible,mensaje );
+                .flatMap(material->{
+                    if (material.isEstado()){
+                        material.setFechaPrestamos(LocalDate.now());
+                        material.setEstado(!material.isEstado());
+                        return repositorio.save(materialMapper.fromDTO(material.getId()).apply(material)).thenReturn(new Mensaje(true,"Transaccion satisfactoriamente"));
+                    }
+                    return Mono.just(new Mensaje(false,MENSAGE_PRESTADO ));
+                });
     }
 
-    private void cambiarEstado(MaterialDTO materialDTO) {
+/*
+    private Mensaje getMensajeCambioEstado(Material materialDTO, boolean disponible, String mensaje) {
+        if(disponible){
+            return cambiarEstado(materialDTO).thenReturn( new Mensaje(disponible,"Transaccion satisfactoriamente"));
+        }
+        return Mono.just(new Mensaje(disponible,mensaje ));
+    }
+
+    private Mono<Material> cambiarEstado(Material materialDTO) {
         materialDTO.setEstado(!materialDTO.isEstado());
         if (!materialDTO.isEstado()) {
             materialDTO.setFechaPrestamos(LocalDate.now());
         }
         Material material = materialMapper.fromDTO(materialDTO.getId()).apply(materialDTO);
-        repositorio.save(material);
-    }
+        return repositorio.save(material);
+    }*/
 
 
 

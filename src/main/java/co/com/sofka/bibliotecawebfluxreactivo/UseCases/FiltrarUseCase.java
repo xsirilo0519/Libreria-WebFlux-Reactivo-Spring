@@ -27,7 +27,7 @@ public class FiltrarUseCase implements IFitroFlux {
     public Flux<MaterialDTO> get(Filtro filtro) {
         String tipoMaterial=filtro.getTipo();
         String areaTematica=filtro.getArea();
-        Flux<MaterialDTO> materialDTOS;
+        Flux<MaterialDTO> materialDTOS=Flux.empty();
         if (busquedaDoble(tipoMaterial, areaTematica)){
             materialDTOS=obtenerPorareayTipo(areaTematica,tipoMaterial);
         }else{
@@ -36,7 +36,7 @@ public class FiltrarUseCase implements IFitroFlux {
         return materialDTOS;
     }
 
-    protected Flux<MaterialDTO> obtenerPorareayTipo(String areaTematica,String tipoMaterial){
+    private Flux<MaterialDTO> obtenerPorareayTipo(String areaTematica,String tipoMaterial){
         return repositorio.findByAreaTematicaAndTipoMaterial(areaTematica,tipoMaterial).map(materialMapper.fromCollection());
     }
     private Flux<MaterialDTO> obtenerPorareaoTipo(String areaTematica,String tipoMaterial){
